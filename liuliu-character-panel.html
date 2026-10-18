@@ -3,483 +3,246 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>六六视觉 · 人物面板</title>
+<title>六六视觉 · 人物</title>
 <style>
-:root {
-  --bg: #0d0d12;
-  --panel: #16161e;
-  --card: #1c1c26;
-  --border: #2a2a38;
-  --text: #e8e8f0;
-  --muted: #8b8ba0;
-  --accent: #5b8cff;
-  --accent-hover: #7aa3ff;
-  --danger: #ff6b8a;
-}
-* { box-sizing: border-box; }
-body {
-  margin: 0;
-  font-family: system-ui, -apple-system, "Segoe UI", Roboto, "Noto Sans SC", sans-serif;
-  background: var(--bg);
-  color: var(--text);
-  min-height: 100vh;
-}
-.header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 12px 20px;
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-}
-.header h1 { margin: 0; font-size: 16px; font-weight: 600; }
-.header .meta { color: var(--muted); font-size: 12px; }
-.panel {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 20px;
-}
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 16px;
-}
-.section-header p { margin: 0; color: var(--muted); font-size: 13px; }
-.actions { display: flex; gap: 8px; }
-button {
-  background: #1e3a5f;
-  color: #7dd3fc;
-  border: 1px solid #2563eb;
-  border-radius: 6px;
-  padding: 6px 12px;
-  font-size: 13px;
-  cursor: pointer;
-}
-button:hover { background: #2563eb; color: #fff; }
-.character-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 12px;
-}
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700&family=Rajdhani:wght@500;600&display=swap');
+:root { --bg:#0a0c12; --panel:#12141a; --text:#e8e8f0; --muted:#a3a3a3; --cyan:#00f3ff; --purple:#b026ff; }
+* { box-sizing:border-box; }
+body { margin:0; font-family:Rajdhani,system-ui,sans-serif; background:var(--bg); color:var(--text); }
+.header { display:flex; align-items:center; justify-content:space-between; padding:14px 20px; background:linear-gradient(180deg,#111111d9,#050505eb); border-bottom:1px solid #00f3ff38; }
+.header h1 { margin:0; font-family:Orbitron,sans-serif; font-size:15px; letter-spacing:.06em; color:var(--cyan); }
+.header .meta { color:var(--muted); font-size:12px; }
+.nav-tabs { display:flex; gap:6px; padding:10px 20px; background:#0e1016; border-bottom:1px solid #ffffff12; }
+.nav-tabs label { padding:6px 16px; border-radius:6px; font-size:13px; cursor:pointer; color:var(--muted); border:1px solid transparent; }
+.nav-tabs input, .sel { display:none; }
+#t-c:checked ~ .nav-tabs label[for="t-c"],
+#t-a:checked ~ .nav-tabs label[for="t-a"] { color:var(--cyan); border-color:var(--cyan); background:#00f3ff14; }
+.panel { max-width:1040px; margin:0 auto; padding:20px; }
+.tab-panel { display:none; }
+#t-c:checked ~ .panel #p-c,
+#t-a:checked ~ .panel #p-a { display:block; }
+.section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:14px; padding-bottom:10px; border-bottom:1px solid #333; }
+.section-header .desc { color:var(--muted); font-size:14px; margin:0; }
+.character-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:16px; }
 .character-card {
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-  padding: 14px;
-  cursor: pointer;
-  transition: border-color .15s, transform .15s;
+  position:relative; overflow:hidden; cursor:pointer; display:block;
+  background:radial-gradient(ellipse 130% 90% at 100% 0,#00f3ff24 0,transparent 52%),
+              radial-gradient(ellipse 110% 80% at 0 100%,#b026ff1f 0,transparent 48%),
+              linear-gradient(148deg,#22242cf7,#12141afc 42%,#0a0c12);
+  border:1px solid #00f3ff38; border-radius:10px; padding:16px;
+  box-shadow:inset 0 0 0 1px #b026ff1a, 0 0 26px #00f3ff1a;
+  transition:transform .2s, box-shadow .2s, border-color .2s;
 }
-.character-card:hover { border-color: var(--accent); transform: translateY(-1px); }
-.card-header { display: flex; gap: 12px; align-items: center; margin-bottom: 12px; }
-.avatar {
-  width: 44px; height: 44px; border-radius: 50%;
-  background: #2d3a5a; display: flex; align-items: center; justify-content: center;
-  font-size: 18px; color: #93c5fd; overflow: hidden; flex-shrink: 0;
-}
-.avatar img { width: 100%; height: 100%; object-fit: cover; }
-.info h4 { margin: 0 0 2px; font-size: 15px; }
-.info p { margin: 0; font-size: 12px; color: var(--muted); }
-.stats { display: flex; flex-direction: column; gap: 6px; }
-.stat-row { display: flex; justify-content: space-between; font-size: 12px; }
-.stat-row .label { color: var(--muted); }
-.stat-row .value { font-variant-numeric: tabular-nums; }
-.empty, .loading {
-  text-align: center; padding: 40px 20px; color: var(--muted);
-}
-.detail {
-  margin-top: 20px; padding: 16px; background: var(--panel);
-  border: 1px solid var(--border); border-radius: 10px;
-}
-.detail h3 { margin: 0 0 8px; font-size: 15px; }
-.detail dl { margin: 0; display: grid; grid-template-columns: 80px 1fr; gap: 6px 12px; font-size: 13px; }
-.detail dt { color: var(--muted); }
-.detail dd { margin: 0; }
-
-.ability-section {
-  margin-top: 16px;
-  padding: 14px 16px;
-  background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
-  border: 1px solid #22d3ee;
-  border-radius: 10px;
-  box-shadow: 0 0 0 1px rgba(34, 211, 238, 0.3);
-}
-.ability-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 10px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid rgba(34, 211, 238, 0.3);
-}
-.ability-header h4 { margin: 0; font-size: 14px; font-weight: 600; }
-.ability-header button {
-  background: transparent;
-  color: #4ade80;
-  border: none;
-  padding: 4px 8px;
-  font-size: 13px;
-  font-weight: 500;
-}
-.ability-header button:hover { color: #86efac; background: transparent; }
-.ability-empty { color: var(--muted); font-size: 13px; padding: 8px 0; }
-.ability-list { display: flex; flex-direction: column; gap: 6px; }
-.nav-tabs {
-  display: flex;
-  gap: 8px;
-  padding: 0 20px 12px;
-  background: var(--panel);
-  border-bottom: 1px solid var(--border);
-}
-.nav-tab {
-  background: transparent;
-  color: var(--muted);
-  border: 1px solid transparent;
-  border-radius: 6px;
-  padding: 6px 14px;
-  font-size: 13px;
-  cursor: pointer;
-}
-.nav-tab.active {
-  color: #7dd3fc;
-  border-color: #2563eb;
-  background: #1e3a5f;
-}
-.nav-tab:hover { color: var(--text); }
-.tab-panel { display: none; }
-.tab-panel.active { display: block; }
-.ability-core {
-  max-width: 720px;
-  margin: 20px auto;
-  padding: 20px;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 10px;
-}
-.ability-core h3 { margin: 0 0 12px; font-size: 16px; }
-.ability-core p { margin: 0 0 10px; font-size: 13px; color: var(--muted); line-height: 1.5; }
-.ability-buttons { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
-.ability-buttons button {
-  background: #4c1d95;
-  color: #e9d5ff;
-  border: 1px solid #7c3aed;
-}
-.ability-core dl { margin: 0; }
-.ability-core dt { color: #7dd3fc; font-size: 13px; font-weight: 600; margin-top: 8px; }
-.ability-core dd { margin: 2px 0 0 0; font-size: 13px; color: var(--text); line-height: 1.45; }
+.character-card:hover { transform:translateY(-3px); border-color:#00f3ff7a; box-shadow:0 0 32px #00f3ff38, 0 0 56px #b026ff1f; }
+.card-header { display:flex; gap:12px; align-items:center; }
+.avatar { width:48px; height:48px; border-radius:50%; background:#b026ff1f; border:1px solid var(--purple); color:var(--purple); display:flex; align-items:center; justify-content:center; font-weight:700; }
+.info h4 { margin:0 0 2px; font-size:15px; font-weight:700; }
+.info p { margin:0; font-size:12px; color:#a3a3a3; font-family:ui-monospace,monospace; }
+.stats { margin-top:12px; display:flex; flex-direction:column; gap:4px; }
+.stat-row { display:flex; justify-content:space-between; font-size:14px; }
+.stat-row .label { color:#a3a3a3; }
+.stat-row .value { font-family:ui-monospace,monospace; }
+.stat-row:first-child .value { color:var(--cyan); }
+.stat-row:nth-child(2) .value { color:#ff4dff; }
+.detail { display:none; margin-top:20px; }
+#s1:checked ~ .panel .d1,
+#s2:checked ~ .panel .d2,
+#s3:checked ~ .panel .d3 { display:block; }
+.detail-inner { background:#12141a; border:1px solid #00f3ff38; border-radius:12px; padding:18px; }
+.detail h3 { margin:0 0 14px; font-size:16px; color:var(--cyan); }
+.detail-grid { display:grid; gap:16px; }
+@media (min-width:768px) { .detail-grid { grid-template-columns:1fr 1fr; } }
+.detail-card { background:#0e1016; border:1px solid #ffffff12; border-radius:10px; padding:14px; }
+.detail-card h4 { margin:0 0 10px; font-size:14px; border-bottom:1px solid #00f3ff2e; padding-bottom:6px; }
+.detail-card dl { margin:0; display:grid; grid-template-columns:100px 1fr; gap:6px 10px; font-size:13px; }
+.detail-card dt { color:var(--muted); }
+.detail-card dd { margin:0; }
+.ability-box { margin-top:16px; padding:14px; background:linear-gradient(135deg,#0f172a,#1e1b4b); border:1px solid #22d3ee; border-radius:10px; grid-column:1/-1; }
+.ability-box h4 { margin:0 0 8px; }
+.ability-box .empty { color:var(--muted); font-size:13px; }
+.ability-core { max-width:760px; margin:0 auto 16px; padding:18px; background:#12141a; border:1px solid #ffffff18; border-radius:10px; }
+.ability-core h3 { margin:0 0 10px; color:var(--cyan); }
+.ability-core p { margin:0 0 8px; font-size:13px; color:var(--muted); line-height:1.5; }
+.ability-buttons { display:flex; flex-wrap:wrap; gap:8px; margin-top:10px; }
+.ability-buttons button { background:#4c1d95; color:#e9d5ff; border:1px solid #7c3aed; border-radius:6px; padding:6px 12px; cursor:pointer; }
+.ability-core dl { margin:8px 0 0; }
+.ability-core dt { color:#7dd3fc; font-weight:600; margin-top:6px; }
+.ability-core dd { margin:2px 0 0; font-size:13px; }
 </style>
 </head>
 <body>
-<div class="header">
-  <h1>规则控制</h1>
-  <div class="meta" id="meta">六六视觉 · 2021-06-06</div>
-</div>
+<input type="radio" name="tab" id="t-c" checked>
+<input type="radio" name="tab" id="t-a">
+<input type="radio" name="sel" id="s1" class="sel">
+<input type="radio" name="sel" id="s2" class="sel">
+<input type="radio" name="sel" id="s3" class="sel">
+<div class="header"><h1>规则控制</h1><div class="meta">六六视觉 · 2021-06-06</div></div>
 <div class="nav-tabs">
-  <button class="nav-tab active" data-tab="characters">人物</button>
-  <button class="nav-tab" data-tab="ability">主角能力界面</button>
+  <label for="t-c">人物</label>
+  <label for="t-a">主角能力界面</label>
 </div>
 <div class="panel">
-  <div id="tab-characters" class="tab-panel active">
-    <div class="section-header">
-      <p>管理当前世界中的所有角色实体。</p>
-      <div class="actions">
-        <button id="btn-refresh" type="button">刷新角色</button>
-      </div>
-    </div>
-    <div id="content" class="character-grid">
-      <article class="character-card" data-id="CHR-001">
+  <div id="p-c" class="tab-panel">
+    <div class="section-header"><p class="desc">管理当前世界中的所有角色实体。点击角色展开详细面板。</p></div>
+    <div class="character-grid">
+      <label class="character-card" for="s1">
         <div class="card-header"><div class="avatar">夏</div><div class="info"><h4>夏文珏</h4><p>质检科长 | CHR-001</p></div></div>
         <div class="stats">
           <div class="stat-row"><span class="label">好感度</span><span class="value">5</span></div>
           <div class="stat-row"><span class="label">发情值</span><span class="value">8%</span></div>
           <div class="stat-row"><span class="label">性癖开发值</span><span class="value">0</span></div>
         </div>
-      </article>
-      <article class="character-card" data-id="CHR-002">
+      </label>
+      <label class="character-card" for="s2">
         <div class="card-header"><div class="avatar">朱</div><div class="info"><h4>朱晓幸</h4><p>成品检验 | CHR-002</p></div></div>
         <div class="stats">
           <div class="stat-row"><span class="label">好感度</span><span class="value">15</span></div>
           <div class="stat-row"><span class="label">发情值</span><span class="value">10%</span></div>
           <div class="stat-row"><span class="label">性癖开发值</span><span class="value">0</span></div>
         </div>
-      </article>
-      <article class="character-card" data-id="CHR-003">
+      </label>
+      <label class="character-card" for="s3">
         <div class="card-header"><div class="avatar">章</div><div class="info"><h4>章萍</h4><p>成品检验 | CHR-003</p></div></div>
         <div class="stats">
           <div class="stat-row"><span class="label">好感度</span><span class="value">10</span></div>
           <div class="stat-row"><span class="label">发情值</span><span class="value">7%</span></div>
           <div class="stat-row"><span class="label">性癖开发值</span><span class="value">0</span></div>
         </div>
-      </article>
+      </label>
     </div>
-    <div id="detail" class="detail" style="display:none;"></div>
-  </div>
-  <div id="tab-ability" class="tab-panel">
-    <div class="ability-core">
-      <h3>主角能力</h3>
-      <p>主角可将视线对准一名人类，通过语音或意念下达命令，控制其行为、身体、常识或意识。是否让目标察觉由主角决定。默认遵守隐蔽原则：目标不会意识到命令、身体素质或常识改写来自外部，也不会联想到主角；只有玩家明确决定让目标知道时，才可描写察觉。能力必须由玩家明确发动，未明确解除前效果持续。点击按钮仅将指令填入输入框，不自动发送。</p>
-      <div class="ability-buttons">
-        <button type="button" data-cmd="常识修改">常识修改</button>
-        <button type="button" data-cmd="身体修改">身体修改</button>
-        <button type="button" data-cmd="意识修改">意识修改</button>
-        <button type="button" data-cmd="解除控制">解除控制</button>
+
+    <div class="detail d1">
+      <div class="detail-inner">
+        <h3>夏文珏 · CHR-001</h3>
+        <div class="detail-grid">
+          <div class="detail-card"><h4>基本信息</h4><dl>
+            <dt>身份</dt><dd>质检部科长，兼任手术显微镜检验</dd>
+            <dt>年龄</dt><dd>36</dd>
+            <dt>婚姻</dt><dd>已婚，无子女</dd>
+            <dt>当前位置</dt><dd>4楼·质检部办公室</dd>
+            <dt>状态</dt><dd>出场中</dd>
+          </dl></div>
+          <div class="detail-card"><h4>外貌与性格</h4><dl>
+            <dt>外貌</dt><dd>157cm，身材微胖，胸部较大，嘴角有痣；黑色长发，常穿黑色。</dd>
+            <dt>性格</dt><dd>爱八卦、话多，表面亲切、背后议论，双重标准明显。</dd>
+          </dl></div>
+          <div class="detail-card"><h4>数值</h4><dl>
+            <dt>好感度</dt><dd>5</dd>
+            <dt>发情值</dt><dd>8%</dd>
+            <dt>性癖开发值</dt><dd>0</dd>
+          </dl></div>
+          <div class="detail-card"><h4>性经历</h4><dl>
+            <dt>与主角做爱</dt><dd>0</dd>
+            <dt>与其他人做爱</dt><dd>380</dd>
+            <dt>精液接受量</dt><dd>阴道 0 / 肛门 0 / 饮精 0 / 合计 0 ml</dd>
+          </dl></div>
+          <div class="detail-card"><h4>隐藏信息</h4><dl>
+            <dt>秘密</dt><dd>习惯用他人的失误维护自己的管理权威。</dd>
+          </dl></div>
+          <div class="ability-box">
+            <h4>当前受能力影响</h4>
+            <div class="empty">暂无个人能力影响</div>
+            <button type="button" style="margin-top:8px;background:#4c1d95;color:#e9d5ff;border:1px solid #7c3aed;border-radius:6px;padding:4px 10px;cursor:pointer;" onclick="alert('管理能力影响（待接入）')">管理能力影响</button>
+          </div>
+        </div>
       </div>
     </div>
 
-    <div class="ability-core">
-      <h3>身体素质目录</h3>
-      <p>以下体质仅在玩家明确赋予，或满足已定义自动获得条件后写入目标的 constitutions。生成涉及身体接触的情节前，应先读取目标体质并体现实际相关效果；无关体质不强行触发。所有触发仍服从隐蔽原则。</p>
-      <dl style="margin-top:12px;">
-        <dt>淫纹</dt><dd>指定部位显现，降低警惕与羞耻并提高敏感。</dd>
-        <dt>心绪安抚</dt><dd>平复情绪波动，减少抗拒感。</dd>
-        <dt>暴露倾向</dt><dd>对暴露自身身体产生更强冲动。</dd>
-        <dt>视奸快感</dt><dd>被注视时产生快感。</dd>
-        <dt>高潮禁止</dt><dd>无法达到高潮。</dd>
-        <dt>强制高潮</dt><dd>在特定条件下被迫高潮。</dd>
-        <dt>高潮强化</dt><dd>高潮强度与持续时间显著提升。</dd>
-        <dt>自毁</dt><dd>对自身产生破坏性倾向（需谨慎使用）。</dd>
-        <dt>敏感提升</dt><dd>身体敏感度整体提高。</dd>
-        <dt>服从</dt><dd>更容易接受指令与建议。</dd>
-        <dt>常识改变</dt><dd>对特定事物的常识认知被改写。</dd>
-        <dt>露出欲望</dt><dd>产生主动露出的欲望。</dd>
-        <dt>奶牛化</dt><dd>胸部相关生理与行为倾向改变。</dd>
-        <dt>魅惑</dt><dd>对他人产生更强吸引。</dd>
-        <dt>敏感带增长</dt><dd>敏感区域扩大或敏感点增加。</dd>
-        <dt>无法拒绝</dt><dd>难以拒绝相关请求。</dd>
-        <dt>苗床</dt><dd>生殖相关生理状态改变。</dd>
-        <dt>避孕</dt><dd>暂时失去受孕能力。</dd>
-        <dt>发情</dt><dd>性欲与生理反应增强。</dd>
-        <dt>反差</dt><dd>表面行为与内在反应形成反差。</dd>
-        <dt>催情荷尔蒙</dt><dd>散发挥发性催情物质。</dd>
-        <dt>快感屏蔽</dt><dd>可屏蔽部分快感感知。</dd>
-        <dt>感官互通</dt><dd>与指定对象共享部分感官。</dd>
-        <dt>淫核</dt><dd>阴核敏感度与反应显著强化。</dd>
-        <dt>淫乳</dt><dd>乳房敏感度与相关反应强化。</dd>
-        <dt>淫壶</dt><dd>阴道敏感度与相关反应强化。</dd>
-        <dt>淫肛</dt><dd>肛门敏感度与相关反应强化。</dd>
-        <dt>气味改造</dt><dd>体味被改写为特定气味。</dd>
-        <dt>极易潮吹</dt><dd>更容易出现潮吹反应。</dd>
-        <dt>肉棒渴望</dt><dd>对阴茎产生强烈渴望。</dd>
-        <dt>精液标记</dt><dd>被精液接触后留下标记效果。</dd>
-        <dt>发情传导</dt><dd>自身发情状态可影响附近对象。</dd>
-        <dt>绝对诚实</dt><dd>难以隐瞒真实想法与感受。</dd>
-        <dt>哦齁淫叫</dt><dd>性相关反应时发出特定叫声。</dd>
-        <dt>接吻魔</dt><dd>对接吻产生强烈依赖与快感。</dd>
-        <dt>旁观快感</dt><dd>观看相关行为时产生快感。</dd>
-        <dt>永续紧致</dt><dd>特定部位保持紧致状态。</dd>
-      </dl>
+    <div class="detail d2">
+      <div class="detail-inner">
+        <h3>朱晓幸 · CHR-002</h3>
+        <div class="detail-grid">
+          <div class="detail-card"><h4>基本信息</h4><dl>
+            <dt>身份</dt><dd>上光源裂隙灯显微镜成品检验员</dd>
+            <dt>年龄</dt><dd>33</dd>
+            <dt>婚姻</dt><dd>已婚，有一个8岁女儿</dd>
+            <dt>当前位置</dt><dd>3楼·大车间·上光源裂隙灯显微镜组</dd>
+            <dt>状态</dt><dd>出场中</dd>
+          </dl></div>
+          <div class="detail-card"><h4>外貌与性格</h4><dl>
+            <dt>外貌</dt><dd>164cm，健康偏瘦，黑色高长马尾。</dd>
+            <dt>性格</dt><dd>温柔友善，情商较低，遇到挫折容易纠结。</dd>
+          </dl></div>
+          <div class="detail-card"><h4>数值</h4><dl>
+            <dt>好感度</dt><dd>15</dd>
+            <dt>发情值</dt><dd>10%</dd>
+            <dt>性癖开发值</dt><dd>0</dd>
+          </dl></div>
+          <div class="detail-card"><h4>性经历</h4><dl>
+            <dt>与主角做爱</dt><dd>0</dd>
+            <dt>与其他人做爱</dt><dd>370</dd>
+            <dt>精液接受量</dt><dd>阴道 0 / 肛门 0 / 饮精 0 / 合计 0 ml</dd>
+          </dl></div>
+          <div class="detail-card"><h4>隐藏信息</h4><dl>
+            <dt>秘密</dt><dd>知道自己检验速度慢，但觉得最后做完就没问题。</dd>
+          </dl></div>
+          <div class="ability-box">
+            <h4>当前受能力影响</h4>
+            <div class="empty">暂无个人能力影响</div>
+            <button type="button" style="margin-top:8px;background:#4c1d95;color:#e9d5ff;border:1px solid #7c3aed;border-radius:6px;padding:4px 10px;cursor:pointer;" onclick="alert('管理能力影响（待接入）')">管理能力影响</button>
+          </div>
+        </div>
+      </div>
     </div>
 
-    <div class="ability-core">
-      <h3>自动获得相关效果</h3>
-      <p>以下体质无需玩家主动赋予，满足条件后自动写入 constitutions。统一采用体质等级：初次获得为无等级；反复触发且稳定出现可升 LV1；明显增强并影响日常选择可升 LV2；成为强烈本能且几乎无法抑制可升 LV3。最高 LV3，不得无故升级。state_update 必须保留完整列表。</p>
-      <dl>
-        <dt>精液上瘾</dt><dd>多次吃下主角精液后获得。对主角精液产生依赖与渴望。</dd>
-        <dt>精液消化</dt><dd>多次被主角体内射精后获得。体内精液被更高效消化吸收。</dd>
-        <dt>精液吸收</dt><dd>多次被主角体表射精后获得。体表精液被更快吸收。</dd>
-        <dt>气味沉醉</dt><dd>多次近距离主动闻主角体味后获得。对主角体味产生沉醉与依赖。</dd>
-      </dl>
-      <p style="margin-top:12px;"><strong>虚构计量规则</strong>：未说明的单次射精默认 50 ml；明确说「大量」为 100 ml；明确说「超大量」为 150 ml；玩家给出具体数字时以具体数字为准。只在相关事件实际发生后更新次数与毫升数；精液毫升数只累计主角产生并由该人物接受的部分。</p>
+    <div class="detail d3">
+      <div class="detail-inner">
+        <h3>章萍 · CHR-003</h3>
+        <div class="detail-grid">
+          <div class="detail-card"><h4>基本信息</h4><dl>
+            <dt>身份</dt><dd>成品检验，原半成品检验班长</dd>
+            <dt>年龄</dt><dd>32</dd>
+            <dt>婚姻</dt><dd>已婚，有一个刚上小学的儿子</dd>
+            <dt>当前位置</dt><dd>3楼·大车间</dd>
+            <dt>状态</dt><dd>出场中</dd>
+          </dl></div>
+          <div class="detail-card"><h4>外貌与性格</h4><dl>
+            <dt>外貌</dt><dd>圆滑，熟悉公司人员。</dd>
+            <dt>性格</dt><dd>擅长处理人际关系；任务压来时会玩笑抱怨但最终完成。</dd>
+          </dl></div>
+          <div class="detail-card"><h4>数值</h4><dl>
+            <dt>好感度</dt><dd>10</dd>
+            <dt>发情值</dt><dd>7%</dd>
+            <dt>性癖开发值</dt><dd>0</dd>
+          </dl></div>
+          <div class="detail-card"><h4>性经历</h4><dl>
+            <dt>与主角做爱</dt><dd>0</dd>
+            <dt>精液接受量</dt><dd>合计 0 ml</dd>
+          </dl></div>
+          <div class="detail-card"><h4>隐藏信息</h4><dl>
+            <dt>秘密</dt><dd>待补充</dd>
+          </dl></div>
+          <div class="ability-box">
+            <h4>当前受能力影响</h4>
+            <div class="empty">暂无个人能力影响</div>
+            <button type="button" style="margin-top:8px;background:#4c1d95;color:#e9d5ff;border:1px solid #7c3aed;border-radius:6px;padding:4px 10px;cursor:pointer;" onclick="alert('管理能力影响（待接入）')">管理能力影响</button>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 
+  <div id="p-a" class="tab-panel">
     <div class="ability-core">
-      <h3>特殊能力</h3>
+      <h3>主角能力</h3>
+      <p>视线对准一名人类，通过语音或意念下达命令。默认遵守隐蔽原则。点击按钮复制指令。</p>
+      <div class="ability-buttons">
+        <button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText('【主角能力】对目标使用：常识修改').then(()=>alert('已复制'),()=>alert('【主角能力】对目标使用：常识修改'))">常识修改</button>
+        <button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText('【主角能力】对目标使用：身体修改').then(()=>alert('已复制'),()=>alert('【主角能力】对目标使用：身体修改'))">身体修改</button>
+        <button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText('【主角能力】对目标使用：意识修改').then(()=>alert('已复制'),()=>alert('【主角能力】对目标使用：意识修改'))">意识修改</button>
+        <button type="button" onclick="navigator.clipboard&&navigator.clipboard.writeText('【主角能力】对目标使用：解除控制').then(()=>alert('已复制'),()=>alert('【主角能力】对目标使用：解除控制'))">解除控制</button>
+      </div>
+    </div>
+    <div class="ability-core">
+      <h3>自动获得</h3>
       <dl>
-        <dt>感官共享</dt><dd>单向投射主角当前快感与触感给目标。</dd>
-        <dt>存在感淡化</dt><dd>降低自身被他人注意的程度。</dd>
-        <dt>约 18 米范围常识扭曲</dt><dd>同时扭曲 1—3 条常识；目标离开范围后逐渐失效，但行为和记忆保留。</dd>
-        <dt>清洁魔术</dt><dd>清除痕迹与污渍。</dd>
-        <dt>瞬移并扭曲旁人感知</dt><dd>瞬间移动，并扭曲旁人对消失与出现的感知。</dd>
+        <dt>精液上瘾</dt><dd>多次吃下主角精液后获得。</dd>
+        <dt>精液消化</dt><dd>多次被主角体内射精后获得。</dd>
+        <dt>精液吸收</dt><dd>多次被主角体表射精后获得。</dd>
+        <dt>气味沉醉</dt><dd>多次近距离主动闻主角体味后获得。</dd>
       </dl>
     </div>
   </div>
 </div>
-<script>
-// 简化人物面板：仅保留角色列表与基础属性
-// 数据优先从 SillyTavern MVU 读取，失败时使用六六视觉示例数据
-
-// 变量数据调取：完全参考第一张规则模拟器卡的设计
-// 主路径：stat_data.角色档案[CHR-xxx].数值.{好感度, 发情值, 性癖开发值}
-// 暴露方式参考：<status_current_variable>{{format_message_variable::stat_data}}</status_current_variable>
-
-const DEMO_CHARACTERS = [
-  { id: "CHR-001", name: "夏文珏", role: "质检科长", status: "出场中", affection: 5, lust: 8, fetish: 0, note: "36岁，已婚无孩，负责手术显微镜检验。爱八卦，双重标准明显。", abilities: [], location: "4楼·质检部办公室", sex: { withProtagonist: 0, withOthers: 380, creampieV: 248, creampieA: 3, drink: 47, ml: { vaginal: 0, anal: 0, oral: 0, total: 0 } } },
-  { id: "CHR-002", name: "朱晓幸", role: "成品检验", status: "出场中", affection: 15, lust: 10, fetish: 0, note: "负责上光源裂隙灯。温柔友善，情商较低，检验较慢。", abilities: [], location: "3楼·大车间·上光源裂隙灯显微镜组", sex: { withProtagonist: 0, withOthers: 370, creampieV: 235, creampieA: 0, drink: 45, ml: { vaginal: 0, anal: 0, oral: 0, total: 0 } } },
-  { id: "CHR-003", name: "章萍", role: "成品检验", status: "出场中", affection: 10, lust: 7, fetish: 0, note: "原半成品班长，圆滑，负责下光源与工时记录。", abilities: [], location: "3楼·大车间", sex: { withProtagonist: 0, withOthers: 0, creampieV: 0, creampieA: 0, drink: 0, ml: { vaginal: 0, anal: 0, oral: 0, total: 0 } } }
-];
-
-function tryReadFromMvu() {
-  try {
-    if (typeof getVariables !== "function") return null;
-    // 优先当前助手楼层，再回退 latest（参考第一张卡的读取习惯）
-    let vars = null;
-    try {
-      const lastId = typeof getLastMessageId === "function" ? getLastMessageId() : null;
-      if (lastId != null && lastId >= 0) {
-        vars = getVariables({ type: "message", message_id: lastId });
-      }
-    } catch (_) {}
-    if (!vars) {
-      vars = getVariables({ type: "message", message_id: "latest" });
-    }
-    const stat = vars?.stat_data || vars || {};
-    const archive = stat.角色档案 || stat.stat_data?.角色档案;
-    if (!archive || typeof archive !== "object" || Array.isArray(archive)) return null;
-
-    return Object.entries(archive).map(([id, data]) => {
-      const nums = (data && data.数值) || {};
-      const basic = data.基本 || data.基本信息 || {};
-      const sex = data.性经历 || {};
-      const ml = sex.精液_ml || {};
-      return {
-        id: id,
-        name: data.名称 || data.姓名 || data.name || id,
-        role: basic.职位 || data.身份 || data.role || "角色",
-        status: data.状态 === "retired" || data.状态 === "暂时退场" ? "暂时退场" : "出场中",
-        affection: Number(nums.好感度 ?? data.好感度 ?? 0),
-        lust: Number(nums.发情值 ?? data.发情值 ?? 0),
-        fetish: Number(nums.性癖开发值 ?? 0),
-        note: data.简介 || data.性格 || data.note || "",
-        abilities: Array.isArray(data.能力影响) ? data.能力影响 : [],
-        location: data.当前位置 || "",
-        sex: {
-          withProtagonist: Number(sex.与主角做爱次数 ?? 0),
-          withOthers: Number(sex.与其他人做爱次数 ?? 0),
-          creampieV: Number(sex.阴道内射次数 ?? 0),
-          creampieA: Number(sex.肛门内射次数 ?? 0),
-          drink: Number(sex.饮精次数 ?? 0),
-          ml: {
-            vaginal: Number(ml.阴道内射 ?? 0),
-            anal: Number(ml.肛门内射 ?? 0),
-            oral: Number(ml.饮精 ?? 0),
-            total: Number(ml.合计 ?? 0)
-          }
-        }
-      };
-    });
-  } catch (e) {
-    console.warn("MVU read failed", e);
-    return null;
-  }
-}
-
-function render(list) {
-  const root = document.getElementById("content");
-  if (!list || list.length === 0) {
-    root.className = "empty";
-    root.textContent = "暂无角色";
-    return;
-  }
-  root.className = "character-grid";
-  root.innerHTML = list.map(c => `
-    <article class="character-card" data-id="${c.id}">
-      <div class="card-header">
-        <div class="avatar">${c.name.slice(0,1)}</div>
-        <div class="info">
-          <h4>${escapeHtml(c.name)}</h4>
-          <p>${escapeHtml(c.role)} | ${escapeHtml(c.id)}</p>
-        </div>
-      </div>
-      <div class="stats">
-        <div class="stat-row"><span class="label">好感度</span><span class="value">${c.affection}</span></div>
-        <div class="stat-row"><span class="label">发情值</span><span class="value">${c.lust}%</span></div>
-        <div class="stat-row"><span class="label">性癖开发值</span><span class="value">${c.fetish}</span></div>
-      </div>
-    </article>
-  `).join("");
-  root.querySelectorAll(".character-card").forEach(el => {
-    el.addEventListener("click", () => showDetail(list.find(x => x.id === el.dataset.id)));
-  });
-}
-
-function showDetail(c) {
-  if (!c) return;
-  const d = document.getElementById("detail");
-  d.style.display = "block";
-  const abilities = Array.isArray(c.abilities) ? c.abilities : [];
-  const abilityHtml = abilities.length === 0
-    ? '<div class="ability-empty">暂无个人能力影响</div>'
-    : '<div class="ability-list">' + abilities.map(a => `<div class="ability-item">${escapeHtml(a)}</div>`).join("") + "</div>";
-  const sex = c.sex || { withProtagonist: 0, withOthers: 0, creampieV: 0, creampieA: 0, drink: 0, ml: { vaginal: 0, anal: 0, oral: 0, total: 0 } };
-  const ml = sex.ml || {};
-  d.innerHTML = `
-    <h3>${escapeHtml(c.name)}</h3>
-    <dl>
-      <dt>ID</dt><dd>${escapeHtml(c.id)}</dd>
-      <dt>身份</dt><dd>${escapeHtml(c.role)}</dd>
-      <dt>当前位置</dt><dd>${escapeHtml(c.location || "未确认")}</dd>
-      <dt>状态</dt><dd>${escapeHtml(c.status)}</dd>
-      <dt>好感度</dt><dd>${c.affection}</dd>
-      <dt>发情值</dt><dd>${c.lust}%</dd>
-      <dt>性癖开发值</dt><dd>${c.fetish}</dd>
-      <dt>与主角做爱次数</dt><dd>${sex.withProtagonist}</dd>
-      <dt>与其他人做爱次数</dt><dd>${sex.withOthers}</dd>
-      <dt>阴道内射次数</dt><dd>${sex.creampieV}</dd>
-      <dt>肛门内射次数</dt><dd>${sex.creampieA}</dd>
-      <dt>饮精次数</dt><dd>${sex.drink}</dd>
-      <dt>精液接受量（ml）</dt><dd>阴道 ${ml.vaginal} / 肛门 ${ml.anal} / 饮精 ${ml.oral} / 合计 ${ml.total}</dd>
-      <dt>简介</dt><dd>${escapeHtml(c.note)}</dd>
-    </dl>
-    <div class="ability-section">
-      <div class="ability-header">
-        <h4>当前受能力影响</h4>
-        <button type="button" onclick="alert('管理能力影响（待接入具体逻辑）')">管理能力影响</button>
-      </div>
-      ${abilityHtml}
-    </div>
-  `;
-}
-
-function escapeHtml(s) {
-  return String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&","<":"<",">":">","\"":""","'":"&#39;"}[c]));
-}
-
-function refresh() {
-  try {
-    const fromMvu = tryReadFromMvu();
-    if (fromMvu && fromMvu.length) {
-      render(fromMvu);
-      document.getElementById("meta").textContent = "已从 MVU 读取 · 六六视觉";
-    } else {
-      render(DEMO_CHARACTERS);
-      document.getElementById("meta").textContent = "示例数据 · 六六视觉（未检测到 MVU）";
-    }
-  } catch (e) {
-    console.warn(e);
-    render(DEMO_CHARACTERS);
-    document.getElementById("meta").textContent = "示例数据 · 六六视觉";
-  }
-}
-
-// 延迟执行，兼容 $('body').load() 插入时机
-setTimeout(refresh, 50);
-document.getElementById("btn-refresh").addEventListener("click", refresh);
-document.querySelectorAll(".nav-tab").forEach(btn => {
-  btn.addEventListener("click", () => {
-    document.querySelectorAll(".nav-tab").forEach(b => b.classList.remove("active"));
-    document.querySelectorAll(".tab-panel").forEach(p => p.classList.remove("active"));
-    btn.classList.add("active");
-    document.getElementById("tab-" + btn.dataset.tab).classList.add("active");
-  });
-});
-document.querySelectorAll(".ability-buttons button").forEach(btn => {
-  btn.addEventListener("click", () => {
-    const cmd = btn.dataset.cmd;
-    const text = `【主角能力】对目标使用：${cmd}`;
-    try {
-      if (typeof setChatInput === "function") {
-        setChatInput(text);
-      } else if (window.parent && typeof window.parent.setChatInput === "function") {
-        window.parent.setChatInput(text);
-      } else {
-        alert(text + "\n（未检测到输入框接口，请手动复制）");
-      }
-    } catch (e) {
-      alert(text);
-    }
-  });
-});
-refresh();
-</script>
 </body>
 </html>
