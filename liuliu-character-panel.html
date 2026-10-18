@@ -186,7 +186,32 @@ button:hover { background: #2563eb; color: #fff; }
         <button id="btn-refresh" type="button">刷新角色</button>
       </div>
     </div>
-    <div id="content" class="loading">正在读取角色数据…</div>
+    <div id="content" class="character-grid">
+      <article class="character-card" data-id="CHR-001">
+        <div class="card-header"><div class="avatar">夏</div><div class="info"><h4>夏文珏</h4><p>质检科长 | CHR-001</p></div></div>
+        <div class="stats">
+          <div class="stat-row"><span class="label">好感度</span><span class="value">5</span></div>
+          <div class="stat-row"><span class="label">发情值</span><span class="value">8%</span></div>
+          <div class="stat-row"><span class="label">性癖开发值</span><span class="value">0</span></div>
+        </div>
+      </article>
+      <article class="character-card" data-id="CHR-002">
+        <div class="card-header"><div class="avatar">朱</div><div class="info"><h4>朱晓幸</h4><p>成品检验 | CHR-002</p></div></div>
+        <div class="stats">
+          <div class="stat-row"><span class="label">好感度</span><span class="value">15</span></div>
+          <div class="stat-row"><span class="label">发情值</span><span class="value">10%</span></div>
+          <div class="stat-row"><span class="label">性癖开发值</span><span class="value">0</span></div>
+        </div>
+      </article>
+      <article class="character-card" data-id="CHR-003">
+        <div class="card-header"><div class="avatar">章</div><div class="info"><h4>章萍</h4><p>成品检验 | CHR-003</p></div></div>
+        <div class="stats">
+          <div class="stat-row"><span class="label">好感度</span><span class="value">10</span></div>
+          <div class="stat-row"><span class="label">发情值</span><span class="value">7%</span></div>
+          <div class="stat-row"><span class="label">性癖开发值</span><span class="value">0</span></div>
+        </div>
+      </article>
+    </div>
     <div id="detail" class="detail" style="display:none;"></div>
   </div>
   <div id="tab-ability" class="tab-panel">
@@ -410,13 +435,24 @@ function escapeHtml(s) {
 }
 
 function refresh() {
-  const fromMvu = tryReadFromMvu();
-  render(fromMvu || DEMO_CHARACTERS);
-  document.getElementById("meta").textContent = fromMvu
-    ? "已从 MVU 读取 · 六六视觉"
-    : "示例数据 · 六六视觉（未检测到 MVU）";
+  try {
+    const fromMvu = tryReadFromMvu();
+    if (fromMvu && fromMvu.length) {
+      render(fromMvu);
+      document.getElementById("meta").textContent = "已从 MVU 读取 · 六六视觉";
+    } else {
+      render(DEMO_CHARACTERS);
+      document.getElementById("meta").textContent = "示例数据 · 六六视觉（未检测到 MVU）";
+    }
+  } catch (e) {
+    console.warn(e);
+    render(DEMO_CHARACTERS);
+    document.getElementById("meta").textContent = "示例数据 · 六六视觉";
+  }
 }
 
+// 延迟执行，兼容 $('body').load() 插入时机
+setTimeout(refresh, 50);
 document.getElementById("btn-refresh").addEventListener("click", refresh);
 document.querySelectorAll(".nav-tab").forEach(btn => {
   btn.addEventListener("click", () => {
